@@ -76,6 +76,7 @@ function sparqlApiPlugin() {
 }
 
 export default defineConfig({
+  base: '/humanum-helpers/',
   plugins: [vue(), sparqlApiPlugin()],
   resolve: {
     alias: {
