@@ -135,7 +135,7 @@ export function cleanGeoCoordinate(value) {
   if (match) {
     const lon = parseFloat(match[1]).toFixed(5)
     const lat = parseFloat(match[2]).toFixed(5)
-    return `[${lon}, ${lat}]`
+    return `${lon}, ${lat}`
   }
   return value
 }

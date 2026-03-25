@@ -128,6 +128,7 @@ LIMIT 30`,
   ?item 
   ?itemLabel 
   ?itemLabelJa
+  ?descriptionEn  # Added this
   (SAMPLE(?image) AS ?image)
   (SAMPLE(?dateFormatted) AS ?inceptionDate)
   (SAMPLE(?countryLabel) AS ?country)
@@ -136,27 +137,29 @@ LIMIT 30`,
   (GROUP_CONCAT(DISTINCT ?cultureLabel; separator="|") AS ?cultures)
   (GROUP_CONCAT(DISTINCT ?religionLabel; separator="|") AS ?religions)
 WHERE {
-  # Subquery to gather entities and their individual labels
   {
-    SELECT ?item ?nativeName ?image ?dateFormatted ?countryLabel ?coords ?materialLabel ?cultureLabel ?religionLabel WHERE {
+    SELECT ?item ?image ?dateFormatted ?countryLabel ?coords ?materialLabel ?cultureLabel ?religionLabel ?descriptionEn WHERE {
       ?item wdt:P31 wd:Q15835. # Sacred object
 
-     # OPTIONAL { ?item wdt:P1705 ?nativeName. }
       OPTIONAL { ?item wdt:P18 ?image. }
       OPTIONAL { ?item wdt:P17 ?country. }
       OPTIONAL { ?item wdt:P625 ?coords. }
       
+      # Fetch the English description
+      OPTIONAL { 
+        ?item schema:description ?descriptionEn. 
+        FILTER(LANG(?descriptionEn) = "en") 
+      }
+
       OPTIONAL { 
         ?item wdt:P571 ?inception. 
         BIND(STR(SUBSTR(STR(?inception), 1, 10)) AS ?dateFormatted)
       }
 
-      # Fetching entities for the multi-value fields
       OPTIONAL { ?item wdt:P186 ?material. }
       OPTIONAL { ?item wdt:P2596 ?culture. }
       OPTIONAL { ?item wdt:P140 ?religion. }
 
-      # The Label Service lives inside the subquery to map labels to the variables above
       SERVICE wikibase:label { 
         bd:serviceParam wikibase:language "en". 
         ?country rdfs:label ?countryLabel.
@@ -167,7 +170,6 @@ WHERE {
     }
   }
 
-  # Get the Japanese and English labels for the main item
   OPTIONAL {
     ?item rdfs:label ?itemLabelJa.
     FILTER(LANG(?itemLabelJa) = "ja")
@@ -177,7 +179,7 @@ WHERE {
     FILTER(LANG(?itemLabel) = "en")
   }
 }
-GROUP BY ?item ?itemLabel ?itemLabelJa`
+GROUP BY ?item ?itemLabel ?itemLabelJa ?descriptionEn`
 }
 
 function defaultQuery() {
