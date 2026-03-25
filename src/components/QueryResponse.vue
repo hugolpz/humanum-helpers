@@ -28,7 +28,7 @@
           >{{ tab }}</button>
         </div>
 
-        <DownloadDatas :data="data" />
+        <DownloadDatas :data="data" :active-tab="activeTab" />
       </div>
 
       <component :is="activeComponent" :data="data" :rows="rows" />
